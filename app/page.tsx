@@ -113,22 +113,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Technology Spotlight */}
-      <section className="py-16 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-8 text-center">
-            Latest <span className="text-blue-400">Technology</span>
-          </h2>
-
-          {/* Removed ref and animation classes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {techProducts?.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Categories Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
