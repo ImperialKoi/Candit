@@ -1,35 +1,36 @@
-"use client" // Added 'use client' for the search functionality
+"use client"
 
-import { useState } from "react" // Import useState
-import { useRouter } from "next/navigation" // Import useRouter
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { createServerClient } from "@/lib/supabase"
 import ProductCard from "@/components/product-card"
 import { Card, CardContent } from "@/components/ui/card"
-import { Star, Truck, Shield, RotateCcw, Search } from "lucide-react" // Import Search icon
-import { Input } from "@/components/ui/input" // Import Input component
-import { Button } from "@/components/ui/button" // Import Button component
+import { Star, Truck, Shield, RotateCcw, Search } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+// Removed: import { useScrollReveal } from "@/hooks/use-scroll-reveal"
+// Removed: import { cn } from "@/lib/utils" // Assuming cn is only used for animation here
 
 export default function HomePage() {
-  const [searchQuery, setSearchQuery] = useState("") // State for search input
+  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
-  // Function to handle search
+  // Removed: Scroll reveal hooks for each section
+  // const { ref: featuredRef, isVisible: featuredIsVisible } = useScrollReveal({ delay: 100 })
+  // const { ref: techRef, isVisible: techIsVisible } = useScrollReveal({ delay: 200 })
+  // const { ref: categoriesRef, isVisible: categoriesIsVisible } = useScrollReveal({ delay: 300 })
+
   const handleSearch = () => {
     if (searchQuery.trim()) {
       router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery("") // Clear search input after navigating
+      setSearchQuery("")
     }
   }
 
-  // Note: Data fetching for featuredProducts and techProducts will still happen on the server
-  // as this component is now a client component, but the initial data fetch will be done
-  // on the server and then hydrated on the client.
-  // For a more optimized approach with client components, you might consider SWR or React Query.
-  // For this example, we'll keep the existing server-side data fetching pattern for simplicity.
   const [featuredProducts, setFeaturedProducts] = useState<any[] | null>(null)
   const [techProducts, setTechProducts] = useState<any[] | null>(null)
 
-  useState(() => {
+  useEffect(() => {
     const fetchInitialProducts = async () => {
       const supabase = createServerClient()
       const { data: featured } = await supabase
@@ -43,7 +44,7 @@ export default function HomePage() {
       setTechProducts(tech)
     }
     fetchInitialProducts()
-  })
+  }, [])
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -52,8 +53,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Welcome to <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Candit
+              Welcome to{" "}
+              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                ShopZone
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8">Discover amazing products at unbeatable prices</p>
@@ -102,6 +104,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold">Featured Products</h2>
           </div>
 
+          {/* Removed ref and animation classes */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts?.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -117,9 +120,41 @@ export default function HomePage() {
             Latest <span className="text-blue-400">Technology</span>
           </h2>
 
+          {/* Removed ref and animation classes */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {techProducts?.map((product) => (
               <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Grid */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-8 text-center">Shop by Category</h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[
+              { name: "Technology", icon: "💻", color: "from-blue-600 to-blue-800" },
+              { name: "Gift Cards", icon: "🎁", color: "from-purple-600 to-purple-800" },
+              { name: "Home Essentials", icon: "🏠", color: "from-green-600 to-green-800" },
+              { name: "Games", icon: "🎮", color: "from-red-600 to-red-800" },
+              { name: "Board Games", icon: "🎲", color: "from-yellow-600 to-yellow-800" },
+            ].map((category) => (
+              <Card
+                key={category.name}
+                className="bg-gray-900 border-gray-800 hover:border-blue-400 transition-all cursor-pointer"
+              >
+                <CardContent className="p-6 text-center" onClick={() => router.push(`/category/${category.name.toLowerCase().replace(" ", "-")}`)}>
+                  <div
+                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center text-2xl`}
+                  >
+                    {category.icon}
+                  </div>
+                  <h3 className="text-white font-semibold">{category.name}</h3>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

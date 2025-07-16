@@ -9,3 +9,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export const createServerClient = () => {
   return createClient(supabaseUrl, supabaseAnonKey)
 }
+
+export const checkEmailConfirmation = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  return user && !user.email_confirmed_at
+}

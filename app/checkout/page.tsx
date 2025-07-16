@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { CreditCard, Smartphone, Lock, ArrowLeft, Check } from "lucide-react"
+import { CreditCard, Smartphone, Lock, ArrowLeft, Check, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -213,12 +213,21 @@ export default function CheckoutPage() {
   const getTotalPrice = () => cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
   const getTotalItems = () => cartItems.reduce((total, item) => total + item.quantity, 0)
 
+  const getShippingCost = () => {
+    const allItemsFreeShipping = cartItems.every((item) => item.product.is_free_shipping)
+    return allItemsFreeShipping ? 0 : 5.0 // Flat $5.00 shipping if any item is not free shipping
+  }
+
+  const getTaxAmount = () => (getTotalPrice() + getShippingCost()) * 0.13 // Calculate tax on subtotal + shipping
+
+  const getTotalAmount = () => getTotalPrice() + getShippingCost() + getTaxAmount()
+
   const handlePaymentSuccess = async () => {
     setProcessing(true)
     try {
       const orderData = {
         user_id: user.id,
-        total_amount: getTotalPrice() * 1.13,
+        total_amount: getTotalAmount(),
         status: "completed",
         payment_method: paymentMethod,
         shipping_address: { firstName, lastName, address, city, postalCode, country },
@@ -283,7 +292,7 @@ export default function CheckoutPage() {
               Thank you for your purchase. Your order has been successfully processed.
             </p>
             <p className="text-gray-400 mb-8">
-              Order Total: <span className="text-blue-400 font-bold">${(getTotalPrice() * 1.13).toFixed(2)}</span>
+              Order Total: <span className="text-blue-400 font-bold">${getTotalAmount().toFixed(2)}</span>
             </p>
             <div className="space-x-4">
               <Button onClick={() => router.push("/")} className="bg-blue-600 hover:bg-blue-700">
@@ -303,7 +312,9 @@ export default function CheckoutPage() {
     )
   }
 
-  const totalAmount = getTotalPrice() * 1.13
+  const totalAmount = getTotalAmount()
+  const shippingCost = getShippingCost()
+  const taxAmount = getTaxAmount()
   const isShippingInfoFilled = firstName && lastName && address && city && postalCode
 
   return (
@@ -543,6 +554,11 @@ export default function CheckoutPage() {
                       <div className="flex-1">
                         <h4 className="text-sm font-medium text-white line-clamp-2">{item.product.name}</h4>
                         <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                        {item.product.is_free_shipping && (
+                          <p className="text-xs text-green-400 flex items-center">
+                            <Truck className="w-3 h-3 mr-1" /> Free Shipping
+                          </p>
+                        )}
                       </div>
                       <div className="text-sm font-medium text-blue-400">
                         ${(item.product.price * item.quantity).toFixed(2)}
@@ -558,11 +574,15 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-300">Shipping</span>
-                    <span className="text-green-400">FREE</span>
+                    {shippingCost === 0 ? (
+                      <span className="text-green-400">FREE</span>
+                    ) : (
+                      <span className="text-white">${shippingCost.toFixed(2)}</span>
+                    )}
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-300">Tax (13%)</span>
-                    <span className="text-white">${(getTotalPrice() * 0.13).toFixed(2)}</span>
+                    <span className="text-white">${taxAmount.toFixed(2)}</span>
                   </div>
                 </div>
                 <Separator className="bg-gray-700 mb-4" />

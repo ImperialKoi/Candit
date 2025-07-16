@@ -8,6 +8,7 @@ export interface Product {
   stock: number
   rating: number
   created_at: string
+  is_free_shipping?: boolean // Added new property
 }
 
 export interface CartItem {

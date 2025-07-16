@@ -5,12 +5,13 @@ import type React from "react"
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Star, ShoppingCart } from "lucide-react"
+import { Star, ShoppingCart, Truck } from "lucide-react" // Added Truck icon
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { supabase } from "@/lib/supabase"
 import type { Product } from "@/lib/types"
 import { useRouter } from "next/navigation"
+import { Badge } from "@/components/ui/badge" // Import Badge
 
 interface ProductCardProps {
   product: Product
@@ -95,7 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-blue-400">${product.price.toFixed(2)}</span>
+            <span className="text-xl font-bold text-blue-400">${product.price.toFixed(2)}</span>
 
             <Button
               onClick={addToCart}
@@ -109,8 +110,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                 "Out of Stock"
               ) : (
                 <>
-                  <ShoppingCart className="w-4 h-4 mr-1" />
-                  Add to Cart
+                  <ShoppingCart className="w-4 h-4 mr-1 sm:mr-0 lg:mr-1" />
+                  <span className="hidden sm:inline">Add to Cart</span>
+                  <span className="inline sm:hidden">Add</span>
                 </>
               )}
             </Button>
@@ -118,6 +120,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {product.stock < 10 && product.stock > 0 && (
             <p className="text-orange-400 text-sm mt-2">Only {product.stock} left in stock!</p>
+          )}
+
+          {product.is_free_shipping && (
+            <Badge variant="secondary" className="mt-2 bg-green-600 text-white">
+              <Truck className="w-3 h-3 mr-1" /> Free Shipping
+            </Badge>
           )}
         </CardContent>
       </Card>

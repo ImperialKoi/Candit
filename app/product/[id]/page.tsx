@@ -178,10 +178,12 @@ export default function ProductPage({ params }: ProductPageProps) {
             <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center">
-                    <Truck className="w-5 h-5 text-blue-400 mr-2" />
-                    <span className="text-sm">Free Shipping</span>
-                  </div>
+                  {product.is_free_shipping && ( // Conditionally render Free Shipping
+                    <div className="flex items-center">
+                      <Truck className="w-5 h-5 text-blue-400 mr-2" />
+                      <span className="text-sm">Free Shipping</span>
+                    </div>
+                  )}
                   <div className="flex items-center">
                     <Shield className="w-5 h-5 text-purple-400 mr-2" />
                     <span className="text-sm">Secure Payment</span>

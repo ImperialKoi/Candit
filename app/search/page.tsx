@@ -7,12 +7,17 @@ import ProductCard from "@/components/product-card"
 import type { Product } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { SearchIcon } from "lucide-react"
+// Removed: import { useScrollReveal } from "@/hooks/use-scroll-reveal"
+// Removed: import { cn } from "@/lib/utils" // Assuming cn is only used for animation here
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
   const query = searchParams.get("query") || ""
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Removed: Scroll reveal hook
+  // const { ref: searchResultsRef, isVisible: searchResultsIsVisible } = useScrollReveal({ delay: 100, key: query })
 
   useEffect(() => {
     if (query) {
@@ -26,11 +31,7 @@ export default function SearchPage() {
   const fetchSearchResults = async (searchQuery: string) => {
     setLoading(true)
     const supabase = createServerClient()
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .ilike("name", `%${searchQuery}%`) // Case-insensitive search on product name
-      .order("name")
+    const { data, error } = await supabase.from("products").select("*").ilike("name", `%${searchQuery}%`).order("name")
 
     if (error) {
       console.error("Error fetching search results:", error)
@@ -57,6 +58,7 @@ export default function SearchPage() {
         </h1>
 
         {products.length > 0 ? (
+          // Removed ref and animation classes
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
