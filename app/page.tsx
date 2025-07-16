@@ -1,18 +1,49 @@
+"use client" // Added 'use client' for the search functionality
+
+import { useState } from "react" // Import useState
+import { useRouter } from "next/navigation" // Import useRouter
 import { createServerClient } from "@/lib/supabase"
 import ProductCard from "@/components/product-card"
 import { Card, CardContent } from "@/components/ui/card"
-import { Star, Truck, Shield, RotateCcw } from "lucide-react"
+import { Star, Truck, Shield, RotateCcw, Search } from "lucide-react" // Import Search icon
+import { Input } from "@/components/ui/input" // Import Input component
+import { Button } from "@/components/ui/button" // Import Button component
 
-export default async function HomePage() {
-  const supabase = createServerClient()
+export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState("") // State for search input
+  const router = useRouter()
 
-  const { data: featuredProducts } = await supabase
-    .from("products")
-    .select("*")
-    .order("rating", { ascending: false })
-    .limit(8)
+  // Function to handle search
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery("") // Clear search input after navigating
+    }
+  }
 
-  const { data: techProducts } = await supabase.from("products").select("*").eq("category", "Technology").limit(4)
+  // Note: Data fetching for featuredProducts and techProducts will still happen on the server
+  // as this component is now a client component, but the initial data fetch will be done
+  // on the server and then hydrated on the client.
+  // For a more optimized approach with client components, you might consider SWR or React Query.
+  // For this example, we'll keep the existing server-side data fetching pattern for simplicity.
+  const [featuredProducts, setFeaturedProducts] = useState<any[] | null>(null)
+  const [techProducts, setTechProducts] = useState<any[] | null>(null)
+
+  useState(() => {
+    const fetchInitialProducts = async () => {
+      const supabase = createServerClient()
+      const { data: featured } = await supabase
+        .from("products")
+        .select("*")
+        .order("rating", { ascending: false })
+        .limit(8)
+      setFeaturedProducts(featured)
+
+      const { data: tech } = await supabase.from("products").select("*").eq("category", "Technology").limit(4)
+      setTechProducts(tech)
+    }
+    fetchInitialProducts()
+  })
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -21,10 +52,30 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Welcome to <span className="text-blue-400">Shop</span>
-              <span className="text-purple-400">Zone</span>
+              Welcome to <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Candit
+              </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8">Discover amazing products at unbeatable prices</p>
+            {/* Search Bar in Hero Section */}
+            <div className="max-w-md mx-auto flex gap-2 mb-8">
+              <Input
+                type="text"
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch()
+                  }
+                }}
+                className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+              />
+              <Button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700">
+                <Search className="w-5 h-5" />
+                <span className="sr-only">Search</span>
+              </Button>
+            </div>
             <div className="flex flex-wrap justify-center gap-8 text-sm">
               <div className="flex items-center">
                 <Truck className="w-5 h-5 mr-2 text-blue-400" />
@@ -69,38 +120,6 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {techProducts?.map((product) => (
               <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Grid */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-8 text-center">Shop by Category</h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[
-              { name: "Technology", icon: "💻", color: "from-blue-600 to-blue-800" },
-              { name: "Gift Cards", icon: "🎁", color: "from-purple-600 to-purple-800" },
-              { name: "Home Essentials", icon: "🏠", color: "from-green-600 to-green-800" },
-              { name: "Games", icon: "🎮", color: "from-red-600 to-red-800" },
-              { name: "Board Games", icon: "🎲", color: "from-yellow-600 to-yellow-800" },
-              { name: "Groceries", icon: "🛒", color: "from-orange-600 to-orange-800" },
-            ].map((category) => (
-              <Card
-                key={category.name}
-                className="bg-gray-900 border-gray-800 hover:border-blue-400 transition-all cursor-pointer"
-              >
-                <CardContent className="p-6 text-center">
-                  <div
-                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center text-2xl`}
-                  >
-                    {category.icon}
-                  </div>
-                  <h3 className="text-white font-semibold">{category.name}</h3>
-                </CardContent>
-              </Card>
             ))}
           </div>
         </div>

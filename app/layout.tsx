@@ -7,9 +7,8 @@ import Navbar from "@/components/navbar"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ShopZone - Your Ultimate Shopping Destination",
+  title: "Welcome to Candit",
   description: "Discover amazing products at unbeatable prices with free shipping and secure payments.",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({

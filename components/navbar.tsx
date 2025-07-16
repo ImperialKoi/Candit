@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
+import { Badge } from "@/components/ui/badge"
 
 const categories = ["Technology", "Gift Cards", "Home Essentials", "Games", "Board Games", "Groceries"]
 
@@ -15,6 +16,7 @@ export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [cartCount, setCartCount] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
   useEffect(() => {
@@ -53,14 +55,24 @@ export default function Navbar() {
     router.push("/")
   }
 
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      router.push(`/search?query=${encodeURIComponent(query.trim())}`)
+      setSearchQuery("") // Clear search input after navigating
+      setIsMenuOpen(false) // Close mobile menu after search
+    }
+  }
+
   return (
-    <nav className="bg-black border-b border-gray-800 sticky top-0 z-50">
+    <nav className="bg-black border-b border-gray-800 sticky top-0 z-50 backdrop-blur-sm bg-black/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-white">
-            <span className="text-blue-400">Shop</span>
-            <span className="text-purple-400">Zone</span>
+          <Link href="/" className="flex items-center space-x-3">
+            <img src="/logo.png" alt="Candit Logo" className="w-8 h-8" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Candit
+            </span>
           </Link>
 
           {/* Search Bar - Hidden on mobile */}
@@ -69,9 +81,24 @@ export default function Navbar() {
               <Input
                 type="text"
                 placeholder="Search products..."
-                className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-400 pr-10"
+                className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-400 pr-10 focus:ring-blue-400 focus:border-blue-400"
+                value={searchQuery} // Bind value to state
+                onChange={(e) => setSearchQuery(e.target.value)} // Update state on change
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch(searchQuery)
+                  }
+                }}
               />
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 text-muted-foreground w-8 h-8 hover:bg-transparent"
+                onClick={() => handleSearch(searchQuery)}
+                aria-label="Search"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
@@ -80,21 +107,26 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link href="/cart" className="relative">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-blue-400">
+                  <Button variant="ghost" size="sm" className="text-white hover:text-blue-400 hover:bg-gray-800">
                     <ShoppingCart className="w-5 h-5" />
                     {cartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      <Badge className="absolute -top-2 -right-2 bg-purple-500 text-white px-1.5 py-0.5 text-xs rounded-full min-w-5 h-5 flex items-center justify-center">
                         {cartCount}
-                      </span>
+                      </Badge>
                     )}
                   </Button>
                 </Link>
                 <Link href="/profile">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-blue-400">
+                  <Button variant="ghost" size="sm" className="text-white hover:text-blue-400 hover:bg-gray-800">
                     <User className="w-5 h-5" />
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-white hover:text-red-400">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleSignOut} 
+                  className="text-white hover:text-red-400 hover:bg-gray-800"
+                >
                   Sign Out
                 </Button>
               </>
@@ -103,7 +135,7 @@ export default function Navbar() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-black bg-transparent"
+                  className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-black bg-transparent transition-colors"
                 >
                   Sign In
                 </Button>
@@ -113,21 +145,27 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setIsMenuOpen(!isMenuOpen)} 
+              className="text-white hover:bg-gray-800"
+            >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
           </div>
         </div>
 
         {/* Categories - Desktop */}
-        <div className="hidden md:flex space-x-6 py-2 border-t border-gray-800">
+        <div className="hidden md:flex justify-center space-x-6 py-3 border-t border-gray-800">
           {categories.map((category) => (
             <Link
               key={category}
               href={`/category/${category.toLowerCase().replace(" ", "-")}`}
-              className="text-gray-300 hover:text-blue-400 text-sm transition-colors"
+              className="text-gray-300 hover:text-blue-400 text-sm transition-colors relative group"
             >
               {category}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
         </div>
@@ -135,22 +173,38 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-gray-900 border-t border-gray-800">
-          <div className="px-4 py-2">
-            <div className="mb-4">
+        <div className="md:hidden bg-gray-900 border-t border-gray-800 shadow-lg">
+          <div className="px-4 py-4">
+            <div className="mb-4 relative">
               <Input
                 type="text"
                 placeholder="Search products..."
-                className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                value={searchQuery} // Bind value to state
+                onChange={(e) => setSearchQuery(e.target.value)} // Update state on change
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch(searchQuery)
+                  }
+                }}
+                className="w-full bg-background border-input text-foreground placeholder-muted-foreground pr-10"
               />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 text-muted-foreground w-8 h-8 hover:bg-transparent"
+                onClick={() => handleSearch(searchQuery)}
+                aria-label="Search"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
             </div>
 
-            <div className="space-y-2 mb-4">
+            <div className="space-y-1 mb-4">
               {categories.map((category) => (
                 <Link
                   key={category}
                   href={`/category/${category.toLowerCase().replace(" ", "-")}`}
-                  className="block text-gray-300 hover:text-blue-400 py-2"
+                  className="block text-gray-300 hover:text-blue-400 py-2 px-2 rounded-md hover:bg-gray-800 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {category}
@@ -158,17 +212,17 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="flex items-center space-x-4 pt-4 border-t border-gray-800">
+            <div className="flex flex-col space-y-2 pt-4 border-t border-gray-800">
               {user ? (
                 <>
                   <Link href="/cart" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="ghost" size="sm" className="text-white">
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-white hover:bg-gray-800">
                       <ShoppingCart className="w-5 h-5 mr-2" />
                       Cart ({cartCount})
                     </Button>
                   </Link>
                   <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="ghost" size="sm" className="text-white">
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-white hover:bg-gray-800">
                       <User className="w-5 h-5 mr-2" />
                       Profile
                     </Button>
@@ -180,14 +234,18 @@ export default function Navbar() {
                       handleSignOut()
                       setIsMenuOpen(false)
                     }}
-                    className="text-red-400"
+                    className="w-full justify-start text-red-400 hover:bg-gray-800"
                   >
                     Sign Out
                   </Button>
                 </>
               ) : (
                 <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" size="sm" className="border-blue-400 text-blue-400 bg-transparent">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-black bg-transparent"
+                  >
                     Sign In
                   </Button>
                 </Link>

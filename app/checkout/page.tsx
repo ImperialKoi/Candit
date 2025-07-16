@@ -126,7 +126,7 @@ function PayPalCheckout({ amount, onPaymentSuccess }: { amount: number; onPaymen
               purchase_units: [
                 {
                   amount: { value: amount.toFixed(2), currency_code: "USD" },
-                  description: "ShopZone Purchase",
+                  description: "Candit Purchase",
                 },
               ],
             })
@@ -162,7 +162,7 @@ const handleInteracPayment = async (
 
   setProcessing(true)
   const orderRef = `ORD-${Date.now()}`
-  const instructions = `Interac e-Transfer Payment Instructions:\n\nSend: $${totalAmount.toFixed(2)} CAD\nTo: payments@shopzone.com\nReference: ${orderRef}\nSecurity Question: What is your order number?\nAnswer: ${orderRef}\n\nYour order will be processed within 24 hours of payment receipt.\nYou will receive a confirmation email once payment is verified.`
+  const instructions = `Interac e-Transfer Payment Instructions:\n\nSend: $${totalAmount.toFixed(2)} CAD\nTo: payments@candit.com\nReference: ${orderRef}\nSecurity Question: What is your order number?\nAnswer: ${orderRef}\n\nYour order will be processed within 24 hours of payment receipt.\nYou will receive a confirmation email once payment is verified.`
   alert(instructions)
   await new Promise((resolve) => setTimeout(resolve, 2000))
   await handlePaymentSuccess()
@@ -494,7 +494,7 @@ export default function CheckoutPage() {
                         <p className="text-green-400 text-xs">
                           Amount: ${totalAmount.toFixed(2)} CAD
                           <br />
-                          Email: payments@shopzone.com
+                          Email: payments@candit.com
                         </p>
                       </div>
                       <Button
